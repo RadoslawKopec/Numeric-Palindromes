@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app version="3.1" xmlns="http://xmlns.jcp.org/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd">
+    <servlet>
+        <servlet-name>PalindromeServlet</servlet-name>
+        <servlet-class>main.java.pl.polsl.palindrome.web.PalindromeServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>PalindromeHistoryServlet</servlet-name>
+        <servlet-class>main.java.pl.polsl.palindrome.web.PalindromeHistoryServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>PalindromeServlet</servlet-name>
+        <url-pattern>/PalindromeServlet</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>PalindromeHistoryServlet</servlet-name>
+        <url-pattern>/PalindromeHistoryServlet</url-pattern>
+    </servlet-mapping>
+    <session-config>
+        <session-timeout>
+            30
+        </session-timeout>
+    </session-config>
+    <context-param>
+        <param-name>DbConnText</param-name>
+        <param-value>jdbc:derby://localhost:1527/Palindrome</param-value>
+    </context-param>
+    <listener>
+        <listener-class>main.java.pl.polsl.palindrome.web.PalindromeServerInitializer</listener-class>
+    </listener>
+    <context-param>
+        <param-name>DbDriver</param-name>
+        <param-value>org.apache.derby.jdbc.ClientDriver</param-value>
+    </context-param>
+</web-app>

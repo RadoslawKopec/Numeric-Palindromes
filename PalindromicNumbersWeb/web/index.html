@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>PalindromicNumbersWeb</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
+        <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/jquery.matchHeight/0.7.0/jquery.matchHeight-min.js"></script>
+        <style>
+            .pre-scrollable {
+                max-height: 200px;
+            }
+            .red-label {
+                color: red;
+            }
+            .white-label {
+                color: #fff;
+            }
+            .login-bg {
+                background: #303030 no-repeat center;
+                max-width: 100%;
+                height: 100vh;
+                background-position: center;
+            }
+            .form-container {
+                border: 0px solid #fff;
+                padding: 30px 40px;
+                margin-top: 10vh;
+                -webkit-box-shadow: -1px 4px 26px 11px rgba(0,0,0,0.75);
+                -moz-box-shadow: -1px 4px 26px 11px rgba(0,0,0,0.75);
+                box-shadow: -1px 4px 26px 11px rgba(0,0,0,0.75);
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container-fluid login-bg">
+            <div class="row">
+                <div class="col-md-1 col-sm-1 col-xs-1"></div>
+                <div id="palindromeServletDiv" class="col-md-5 col-sm-5 col-xs-5">
+                    <form id="palindromeServletForm" class="form-container" action="PalindromeServlet">
+                        <label class="white-label" style="padding-bottom:20px;">Check for palindroms!</label>
+                        <div class="form-group">
+                            <label class="white-label" for="lowerRangeInput">Lower range</label>
+                            <input type="number" class="form-control" name="lowerRangeInput" 
+                                   id="lowerRangeInput" placeholder="Please type a value..." required>
+                        </div>
+                        <div class="form-group">
+                            <label class="white-label" for="upperRangeInput">Upper range</label>
+                            <input type="number" class="form-control" name="upperRangeInput" 
+                                   id="upperRangeInput" placeholder="Please type a value..." required>
+                        </div>
+                        <button id="palindromeServletButton" type="submit" class="btn btn-success btn-block">Submit</button>
+                    </form>
+                </div>
+                <div id="palindromeHistoryServletDiv" class="col-md-5 col-sm-5 col-xs-5">
+                    <form id="palindromeHistoryServletForm" class="form-container" action="PalindromeHistoryServlet">
+                        <label class="white-label" style="padding-bottom:20px;">What did you get in the past?</label>
+                        <button id="palindromeHistoryServletButton" type="submit" class="btn btn-success btn-block">Show</button>
+                    </form>
+                </div>
+                <div class="col-md-1 col-sm-1 col-xs-1"></div>
+            </div>
+            <div class="row">
+                <div class="col-md-1 col-sm-1 col-xs-1"></div>
+                <div class="col-md-10 col-sm-10 col-xs-10" style="padding-top:20px;">
+                    <form class="form-container" style="margin-top: 0vh; margin-bottom: 10vh;">
+                        <div class="box" id="palindromResultDiv">
+                            <label class="white-label">Result will be showed here</label>
+                        </div>
+                    </form>
+                </div>
+                <div class="col-md-1 col-sm-1 col-xs-1"></div>
+            </div>
+        </div>
+    <script>
+        /**
+         * Sets the same height to all form groups.
+         */
+        $(function() {
+            $('.form-container').matchHeight();
+        });
+        /**
+         * Process the response from PalindromeServlet.
+         * Shows the response as a table with visitor count.
+         */
+        $('#palindromeServletForm').submit(function(){
+            setButtonState("palindromeServletButton", true, "Please wait...");
+            $.ajax({
+              url: $('#palindromeServletForm').attr('action'),
+              type: 'POST',
+              data: $('#palindromeServletForm').serialize(),
+              success: function(response){
+                            if(response.isError === true)
+                                showErrorMessage(response);
+                            else {
+                                var visitDiv = "<div class='form-group white-label'>" + 
+                                        "That was your " + response.visitCount + " submit click!</div>\r\n";
+                                var table = "<table class='table'>";
+                                table += "<thead><tr>";
+                                table += "<th class='white-label'>Value</th>";
+                                table += "<th class='white-label'>Is palindrom?</th>";
+                                table += "</tr></thead><tbody>";
+                                for(var singleResult in response.resultArray){
+                                    table += "<tr>";
+                                    table += "<td class='white-label'>" + response.resultArray[singleResult].value + "</td>";
+                                    table += "<td class='white-label'>" + response.resultArray[singleResult].isPalindrome + "</td>";
+                                    table += "</tr>";
+                                }
+                                table += "</tbody></table>";
+                                showSuccessResult(visitDiv + table);
+                            }  
+                            setButtonState("palindromeServletButton", false, "Submit");
+                        }
+            });
+            return false;
+        });
+        /**
+         * Process the response from PalindromeHistoryServlet.
+         * Shows the response as a table.
+         */
+        $('#palindromeHistoryServletForm').submit(function(){
+            setButtonState("palindromeHistoryServletButton", true, "Please wait...");
+            $.ajax({
+              url: $('#palindromeHistoryServletForm').attr('action'),
+              type: 'POST',
+              data: $('#palindromeHistoryServletForm').serialize(),
+              success: function(response){
+                            if(response.isError === true)
+                                showErrorMessage(response);
+                            else {
+                                var table = "<table class='table'>";
+                                table += "<thead><tr>";
+                                table += "<th class='white-label'>Id</th>";
+                                table += "<th class='white-label'>From</th>";
+                                table += "<th class='white-label'>To</th>";
+                                table += "<th class='white-label'>Palindromes</th>";
+                                table += "<th class='white-label'>Non palindromes</th>";
+                                table += "</tr></thead><tbody>";
+                                for(var singleResult in response){
+                                    table += "<tr>";
+                                    table += "<td class='white-label'>" + response[singleResult].id + "</td>";
+                                    table += "<td class='white-label'>" + response[singleResult].from + "</td>";
+                                    table += "<td class='white-label'>" + response[singleResult].to + "</td>";
+                                    table += "<td class='white-label'>" + response[singleResult].palindromesCount + "</td>";
+                                    table += "<td class='white-label'>" + response[singleResult].nonPalindromesCount + "</td>";
+                                    table += "</tr>";
+                                }
+                                table += "</tbody></table>";
+                                showSuccessResult(table);
+                            }
+                            setButtonState("palindromeHistoryServletButton", false, "Show");
+                        }
+            });
+            return false;
+        });
+        /**
+         * Shows the message to result container.
+         * @param {type} content is a html content
+         */
+        function showSuccessResult(content){
+            var resultDiv = document.getElementById("palindromResultDiv");
+            resultDiv.className = "form-group pre-scrollable";
+            resultDiv.innerHTML = content;
+        }
+        /**
+         * Shows the error message to result container.
+         * @param {type} response is a message with errorMessage property
+         */
+        function showErrorMessage(response){
+            var resultDiv = document.getElementById("palindromResultDiv");
+            resultDiv.className = "form-group red-label";
+            resultDiv.innerHTML = response.errorMessage;
+        }
+        /**
+         * Change the button state.
+         * @param {type} id is an identifier of the button
+         * @param {type} disabled is an indicator whether the button is not enabled
+         * @param {type} text is a content inside a button
+         */
+        function setButtonState(id, disabled, text){
+            var button = document.getElementById(id);
+            button.disabled = disabled;
+            button.innerHTML = text;
+        }
+    </script>
+    </body>
+</html>
